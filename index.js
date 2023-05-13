@@ -2,7 +2,10 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const { connectDb } = require('./dataBase')
 require('dotenv').config()
+
+connectDb();
 
 app.use(cors())
 app.use(express.static('public'))
@@ -54,9 +57,9 @@ app.post('/api/users',(req,res,next)=>{
   let username=req.query.username;
 
 
-  res.json({
-    username,
-    _id
+  res.json({/*
+    username: string,
+    _id__id*/
   })
 })
 
@@ -69,10 +72,10 @@ app.post('/api/users/:id/exercises',(req,res,next)=>{
 
   res.json({
     /*{
-  username: username,
-  description: description,
-  duration: duration,
-  date: date,
+  username: string,
+  description: string,
+  duration: number,
+  date: Date(),
   _id: _id
 }
  */

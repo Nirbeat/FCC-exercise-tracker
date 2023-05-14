@@ -2,10 +2,10 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const { connectDb } = require('./dataBase')
 require('dotenv').config()
+const DB = require('./dataBase')
 
-connectDb();
+DB.connectDb();
 
 app.use(cors())
 app.use(express.static('public'))
@@ -16,23 +16,25 @@ app.get('/', (req, res) => {
 
 
 
-app.get('/api/users',(req,res,next)=>{  
+app.get('/api/users', (req, res, next) => {
+
+  //recorrer la coleccion de usuarios y devolver todos
+
+  let users = [];
+
+
 
   res.json([/*lista de users con formato {username:username,_id:_id}*/])
 
 })
 
-app.get('/api/users/:id/exercises',(req,res,next)=>{
-
-})
-
-app.get('/api/users/:id/logs',(req,res,next)=>{
+app.get('/api/users/:id/logs', (req, res, next) => {
 
   //añadir estas peticiones opcionales
 
-  let from= erq.query.from; //Date()
-  let to= req.query.to; //Date()
-  let limit=req.query.limit //number, cantidad maxima de logs a devolver
+  let from = req.query.from; //Date()
+  let to = req.query.to; //Date()
+  let limit = req.query.limit //number, cantidad maxima de logs a devolver
 
 
   res.json({
@@ -40,6 +42,7 @@ app.get('/api/users/:id/logs',(req,res,next)=>{
   username: username,
   count: cantidad de ejercicios (number),
   _id: _id,
+  //para el log, pushear en la busqueda de ejercicios por id
   log: [{
     description: string,
     duration: number,
@@ -51,23 +54,57 @@ app.get('/api/users/:id/logs',(req,res,next)=>{
 })
 
 
-app.use(bodyParser.urlencoded({extended:false}));
-app.post('/api/users',(req,res,next)=>{
+app.use(bodyParser.urlencoded({ extended: false }));
+app.post('/api/users', (req, res, next) => {
 
-  let username=req.query.username;
+  const username = req.body.username;
 
+  DB.UserModel.count().then(id => {
+    let newUser = new DB.UserModel({
+      username: username,
+      _id: id
+    })
 
-  res.json({/*
-    username: string,
-    _id__id*/
+    newUser.save();
+
+    res.json({
+      username : newUser.username,
+      _id : newUser._id
+    })
   })
+
+  // const Model = DB.createUserSchema();
+  // let username = req.body.username;
+
+  // const User = DB.mongoose.model("users", Model);
+
+  // User.count().then(id => {
+  //   let user = new User({
+  //     username: username,
+  //     _id: id
+  //   })
+
+  //   user.save().then(user=>{
+  //     res.json({
+  //       user: user.username,
+  //       _id: user._id
+  //     })
+  //   })
+  // })
+
+
+
+  // res.json({/*
+  //   username: string,
+  //   _id__id*/
+  // })
 })
 
-app.post('/api/users/:id/exercises',(req,res,next)=>{
+app.post('/api/users/:id/exercises', (req, res, next) => {
 
   let description = req.body.description;
-  let duration= req.body.duration;
-  let date =req.body.date || Date();
+  let duration = req.body.duration;
+  let date = req.body.date || Date();
 
 
   res.json({

@@ -4,6 +4,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 const DB = require('./dataBase')
+const { ObjectId } = require('mongodb')
 
 DB.connectDb();
 
@@ -35,27 +36,59 @@ app.get('/api/users', (req, res, next) => {
 
 app.get('/api/users/:_id/logs', (req, res, next) => {
 
-  //añadir estas peticiones opcionales
-  //ojo que el query solo anda para querys no declaradas, en ese  aso se usa params
-  let from = Date.parse(req.query.from || Date()); //Date()
-  let to = Date.parse(req.query.to || Date()); //Date()
-  let limit = parseInt(req.query.limit) || null //number, cantidad maxima de logs a devolver
-
-  const id = req.params._id
-
-  DB.UserModel.findById(DB.getId(id)).then(user => {
-
-    let log=[];
-    
+  const from = new Date(req.query.from || Date());
+  const to = new Date(req.query.to || Date());
+  const limit = parseInt(req.query.limit) || Number.MAX_VALUE;
+  const id = new ObjectId(req.params._id);
 
 
-    //ESTO YA ANDA
-    // res.json({
-    //   username: user.username,
-    //   count: user.log.length,
-    //   _id: user._id,
-    //   log: user.log
-    // })
+  DB.UserModel.findById(id).then(user => {
+    let logs=[];
+
+    if (from != Date()) {
+      DB.ExerciseModel
+        .find({ userId: id })
+        .where('date').gte(from)
+        .lte(to)
+        .limit(limit)
+        .then(exercises => {
+          
+          exercises.forEach(ex=>{
+            logs.push({
+              description : ex.description,
+              duration :ex.duration,
+              date : ex.date.toDateString()
+            })
+          })
+
+          res.json({
+            username: user.username,
+            count:logs.length,
+            _id: id,
+            log:logs,
+          })
+        })
+    } else {
+      DB.ExerciseModel
+        .find({ userId: id })
+        .limit(limit)
+        .then(exercises => {
+          exercises.forEach(ex=>{
+            logs.push({
+              description : ex.description,
+              duration :ex.duration,
+              date : ex.date.toDateString()
+            })
+          })
+
+          res.json({
+            username: user.username,
+            count:logs.length,
+            _id: id,
+            log:logs,
+          })
+        })
+    }
   })
 })
 
@@ -68,10 +101,10 @@ app.post('/api/users', (req, res, next) => {
   //DESCOMENTAR TRAS PASAR LA PRUEBA O PONER CAMPO DE DNI
   const username = req.body.username;
 
-  // DB.UserModel.count().then(id => {
+  DB.UserModel.count().then(id => {
   let newUser = new DB.UserModel({
     username: username,
-    // _id: id
+    _id: new ObjectId(id)
   })
 
   newUser.save();
@@ -81,7 +114,7 @@ app.post('/api/users', (req, res, next) => {
     _id: newUser._id
   })
 })
-// })
+})
 
 //NO PASA LAS PRUEBAS, PERO FUNCIONA PERFECTO, FCC PARECE NO PODER PONER EL ID PARA LA BUSQUEDA
 app.post('/api/users/:_id/exercises', (req, res, next) => {
@@ -96,17 +129,16 @@ app.post('/api/users/:_id/exercises', (req, res, next) => {
 
       let newExercise = new DB.ExerciseModel({
         userId: id,
-        username : user.username,
         description: description,
         duration: duration,
         date: date
       })
 
       newExercise.save();
-
+      
       res.json({
         _id: newExercise.userId,
-        username: newExercise.username,
+        username: user.username,
         date: newExercise.date.toDateString(),
         duration: newExercise.duration,
         description: newExercise.description

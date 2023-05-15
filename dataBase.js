@@ -11,9 +11,6 @@ const ExerciseSchema= new mongoose.Schema({
         type : ObjectId,
         required :true
     },
-    username:{
-        type :String,
-    },
     description:{
         type :String,
         required :true
@@ -29,17 +26,10 @@ const ExerciseSchema= new mongoose.Schema({
 
 const UserSchema =new mongoose.Schema({
 
-    //descomentar tras pasar la prueba, probar el type ObjectId
-        // _id:{
-        //     type : Number
-        // },
         username:{
             type :String,
             required :true
         }
-        // log:{
-        //     type: [ExerciseSchema],
-        // }
     })
 
 

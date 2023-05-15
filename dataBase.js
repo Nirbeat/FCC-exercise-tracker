@@ -7,11 +7,13 @@ function connectDb(){
 
 const ExerciseSchema= new mongoose.Schema({
 
-    // userId:{
-    //     type : new ObjectId(),
-    //     required :true
-    // },
-
+    userId:{
+        type : ObjectId,
+        required :true
+    },
+    username:{
+        type :String,
+    },
     description:{
         type :String,
         required :true
@@ -34,10 +36,10 @@ const UserSchema =new mongoose.Schema({
         username:{
             type :String,
             required :true
-        },
-        log:{
-            type: [ExerciseSchema],
         }
+        // log:{
+        //     type: [ExerciseSchema],
+        // }
     })
 
 

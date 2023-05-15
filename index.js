@@ -45,11 +45,8 @@ app.get('/api/users/:_id/logs', (req, res, next) => {
 
   DB.UserModel.findById(DB.getId(id)).then(user => {
 
-
-    //comprobador de from y to funcionando, revisar los signos
-    //probar volver a la tabla de ejercicios para hacer las busquedas
-    let exerciseAfter = user.log.filter(ex => Date.parse(ex.date) <= from);
-    let exerciseBefore = user.log.filter(ex => Date.parse(ex.date) >= to);
+    let log=[];
+    
 
 
     //ESTO YA ANDA
@@ -96,10 +93,10 @@ app.post('/api/users/:_id/exercises', (req, res, next) => {
 
   DB.UserModel.findOne({ _id: id })
     .then(user => {
-      let username = user.username;
-      console.log(user)
+
       let newExercise = new DB.ExerciseModel({
-        _id: id,
+        userId: id,
+        username : user.username,
         description: description,
         duration: duration,
         date: date
@@ -108,11 +105,11 @@ app.post('/api/users/:_id/exercises', (req, res, next) => {
       newExercise.save();
 
       res.json({
-        _id: id,
-        username: username,
-        date: date.toDateString(),
-        duration: duration,
-        description: description
+        _id: newExercise.userId,
+        username: newExercise.username,
+        date: newExercise.date.toDateString(),
+        duration: newExercise.duration,
+        description: newExercise.description
       })
 
     })

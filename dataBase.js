@@ -7,6 +7,11 @@ function connectDb(){
 
 const ExerciseSchema= new mongoose.Schema({
 
+    // userId:{
+    //     type : new ObjectId(),
+    //     required :true
+    // },
+
     description:{
         type :String,
         required :true
@@ -36,6 +41,7 @@ const UserSchema =new mongoose.Schema({
     })
 
 
+const query = new mongoose.Query();
 const UserModel = mongoose.model("users",UserSchema);
 const ExerciseModel= mongoose.model("exercises", ExerciseSchema)
 
@@ -43,4 +49,6 @@ const ExerciseModel= mongoose.model("exercises", ExerciseSchema)
 function getId(string){
     return new ObjectId(string)
 }
+
+
 module.exports={ExerciseModel, UserModel, connectDb, getId }

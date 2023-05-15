@@ -33,28 +33,32 @@ app.get('/api/users', (req, res, next) => {
 
 })
 
-app.get('/api/users/:id/logs', (req, res, next) => {
+app.get('/api/users/:_id/logs', (req, res, next) => {
 
   //añadir estas peticiones opcionales
+  //ojo que el query solo anda para querys no declaradas, en ese  aso se usa params
+  let from = Date.parse(req.query.from || Date()); //Date()
+  let to = Date.parse(req.query.to || Date()); //Date()
+  let limit = parseInt(req.query.limit) || null //number, cantidad maxima de logs a devolver
 
-  let from = req.query.from; //Date()
-  let to = req.query.to; //Date()
-  let limit = req.query.limit //number, cantidad maxima de logs a devolver
+  const id = req.params._id
+
+  DB.UserModel.findById(DB.getId(id)).then(user => {
 
 
-  res.json({
-    /*{
-  username: username,
-  count: cantidad de ejercicios (number),
-  _id: _id,
-  //para el log, pushear en la busqueda de ejercicios por id
-  log: [{
-    description: string,
-    duration: number,
-    date: Date(),
-  }]
-}
- */
+    //comprobador de from y to funcionando, revisar los signos
+    //probar volver a la tabla de ejercicios para hacer las busquedas
+    let exerciseAfter = user.log.filter(ex => Date.parse(ex.date) <= from);
+    let exerciseBefore = user.log.filter(ex => Date.parse(ex.date) >= to);
+
+
+    //ESTO YA ANDA
+    // res.json({
+    //   username: user.username,
+    //   count: user.log.length,
+    //   _id: user._id,
+    //   log: user.log
+    // })
   })
 })
 
@@ -82,6 +86,7 @@ app.post('/api/users', (req, res, next) => {
 })
 // })
 
+//NO PASA LAS PRUEBAS, PERO FUNCIONA PERFECTO, FCC PARECE NO PODER PONER EL ID PARA LA BUSQUEDA
 app.post('/api/users/:_id/exercises', (req, res, next) => {
 
   let description = req.body.description;
@@ -89,49 +94,28 @@ app.post('/api/users/:_id/exercises', (req, res, next) => {
   let date = new Date(req.body.date || Date());
   let id = DB.getId(req.params._id)
 
-  DB.UserModel.findById(id)
+  DB.UserModel.findOne({ _id: id })
     .then(user => {
-
-      let exArr=user.log;
+      let username = user.username;
+      console.log(user)
       let newExercise = new DB.ExerciseModel({
-              description : description,
-              duration : duration,
-              date : date
+        _id: id,
+        description: description,
+        duration: duration,
+        date: date
       })
-      exArr.push(newExercise);
-      user.updateOne(user, {log:exArr});
-      user.save();
+
+      newExercise.save();
+
       res.json({
-              _id : user._id,
-              username : user.username,
-              date : newExercise.date.toDateString(),
-              duration : newExercise.duration,
-              description : newExercise.description
-            })
+        _id: id,
+        username: username,
+        date: date.toDateString(),
+        duration: duration,
+        description: description
+      })
+
     })
-
-  // DB.UserModel.findOne({_id : req.params.id})
-  //   .then(user=>{
-  //   let newExercise = new DB.ExerciseModel({
-  //     userId : user._id,
-  //     description : req.body.description,
-  //     duration : req.body.duration,
-  //     date : req.body.date || new Date(Date()).toDateString()
-  //   })
-
-  //   newExercise.save().then(exercise=>{
-
-  //     res.json({
-  //       _id : user.userId,
-  //       username : user.username,
-  //       date : exercise.date,
-  //       duration : exercise.duration,
-  //       description : exercise.description
-  //     })
-  //   })
-
-
-  // })
 })
 
 

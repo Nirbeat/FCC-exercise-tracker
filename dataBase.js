@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
 function connectDb(){
@@ -15,7 +16,7 @@ const ExerciseSchema= new mongoose.Schema({
         required :true
     },
     date:{
-        type : String
+        type : Date
     }
 })
 
@@ -30,15 +31,16 @@ const UserSchema =new mongoose.Schema({
             required :true
         },
         log:{
-            type : String,
-            default :"la concha de mi vieja"
+            type: [ExerciseSchema],
         }
     })
+
+
 const UserModel = mongoose.model("users",UserSchema);
-
-let user = new UserModel()
-
-
 const ExerciseModel= mongoose.model("exercises", ExerciseSchema)
 
-module.exports={ExerciseModel, UserModel, connectDb }
+
+function getId(string){
+    return new ObjectId(string)
+}
+module.exports={ExerciseModel, UserModel, connectDb, getId }

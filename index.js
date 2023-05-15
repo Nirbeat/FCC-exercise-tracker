@@ -4,7 +4,6 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 const DB = require('./dataBase')
-const { ObjectId } = require('mongodb')
 
 DB.connectDb();
 
@@ -83,16 +82,32 @@ app.post('/api/users', (req, res, next) => {
 })
 // })
 
-app.post('/api/users/:id/exercises', (req, res, next) => {
+app.post('/api/users/:_id/exercises', (req, res, next) => {
 
   let description = req.body.description;
   let duration = parseInt(req.body.duration);
-  let date = req.body.date || new Date().toDateString()
+  let date = new Date(req.body.date || Date());
+  let id = DB.getId(req.params._id)
 
-  DB.UserModel.findById(new ObjectId(req.params.id) )
+  DB.UserModel.findById(id)
     .then(user => {
-      
 
+      let exArr=user.log;
+      let newExercise = new DB.ExerciseModel({
+              description : description,
+              duration : duration,
+              date : date
+      })
+      exArr.push(newExercise);
+      user.updateOne(user, {log:exArr});
+      user.save();
+      res.json({
+              _id : user._id,
+              username : user.username,
+              date : newExercise.date.toDateString(),
+              duration : newExercise.duration,
+              description : newExercise.description
+            })
     })
 
   // DB.UserModel.findOne({_id : req.params.id})

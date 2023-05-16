@@ -1,46 +1,38 @@
 const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
-function connectDb(){
-    mongoose.connect("mongodb+srv://nirbeat:33enelRefugio@cluster0.au0dubh.mongodb.net/",{useNewUrlParser:true,useUnifiedTopology:true});
+function connectDb() {
+    mongoose.connect("mongodb+srv://nirbeat:33enelRefugio@cluster0.au0dubh.mongodb.net/", { useNewUrlParser: true, useUnifiedTopology: true });
 }
 
-const ExerciseSchema= new mongoose.Schema({
+const ExerciseSchema = new mongoose.Schema({
 
-    userId:{
-        type : ObjectId,
-        required :true
+    userId: {
+        type: ObjectId,
+        required: true
     },
-    description:{
-        type :String,
-        required :true
+    description: {
+        type: String,
+        required: true
     },
-    duration :{
-        type : Number,
-        required :true
+    duration: {
+        type: Number,
+        required: true
     },
-    date:{
-        type : Date
+    date: {
+        type: Date
     }
-})
+});
 
-const UserSchema =new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
 
-        username:{
-            type :String,
-            required :true
-        }
-    })
+    username: {
+        type: String,
+        required: true
+    }
+});
 
+const UserModel = mongoose.model("users", UserSchema);
+const ExerciseModel = mongoose.model("exercises", ExerciseSchema);
 
-const query = new mongoose.Query();
-const UserModel = mongoose.model("users",UserSchema);
-const ExerciseModel= mongoose.model("exercises", ExerciseSchema)
-
-
-function getId(string){
-    return new ObjectId(string)
-}
-
-
-module.exports={ExerciseModel, UserModel, connectDb, getId }
+module.exports = { ExerciseModel, UserModel, connectDb, ObjectId }
